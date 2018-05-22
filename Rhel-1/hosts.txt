@@ -1,0 +1,8 @@
+[kvmhost]
+192.168.2.45 ansible_user=root
+192.168.2.46 ansible_user=root
+
+
+[project_group]
+192.168.3.4 ansible_user=root
+192.168.3.6 ansible_user=root

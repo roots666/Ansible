@@ -1,0 +1,87 @@
+######### check java
+
+- name: register installed java
+  shell: java -version
+  args:
+    warn: no
+  register: java_present
+  failed_when: java_present.rc > 1
+  changed_when: no
+  tags: check_installed
+
+- debug:
+    msg: "{{ java_present.rc }}"
+  tags: check_installed
+
+- fail: msg="Please install java first"
+  when: java_present.rc == 1
+  tags: check_installed
+
+######### check haproxy
+
+- name: register installed haproxy
+  shell: rpm -q haproxy
+  args:
+    warn: no
+  register: haproxy_present
+  failed_when: haproxy_present.rc > 1
+  changed_when: no
+  tags: check_installed
+
+- debug:
+    msg: "{{ haproxy_present.rc }}"
+  tags: check_installed
+
+- fail: msg="Please install haproxy first"
+  when: haproxy_present.rc == 1
+  tags: check_installed
+
+- include: tasks/project_haproxy.yml
+  when: haproxy_present.rc == 0
+  tags: check_installed
+
+######### check nginx
+
+- name: register installed nginx
+  shell: rpm -q nginx
+  args:
+    warn: no
+  register: nginx_present
+  failed_when: nginx_present.rc > 1
+  changed_when: no
+  tags: check_installed
+
+- debug:
+    msg: "{{ nginx_present.rc }}"
+  tags: check_installed
+
+- fail: msg="Please install nginx first"
+  when: nginx_present.rc == 1
+  tags: check_installed
+
+- include: tasks/project_nginx.yml
+  when: nginx_present.rc == 0
+  tags: check_installed
+
+######### check mysql
+
+- name: register installed mysql
+  shell: rpm -q mysql57-community-release
+  args:
+    warn: no
+  register: mysql_present
+  failed_when: mysql_present.rc > 1
+  changed_when: no
+  tags: check_installed
+
+- debug:
+    msg: "{{ mysql_present.rc }}"
+  tags: check_installed
+
+- fail: msg="Please install mysql first"
+  when: mysql_present.rc == 1
+  tags: check_installed
+
+- include: tasks/project_mysql.yml
+  when: mysql_present.rc == 0
+  tags: check_installed
