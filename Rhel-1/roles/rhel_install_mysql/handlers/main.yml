@@ -1,0 +1,7 @@
+---
+# handlers file for roles/rhel_install_percona_mysql
+
+- name: restarted mysql
+  systemd:
+    name: mysqld
+    state: restarted

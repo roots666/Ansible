@@ -1,0 +1,77 @@
+---
+# tasks file for rhel_install_new_server
+
+# Проверяем и устанавливаем системные обновления:
+- name: yum update
+  yum:
+    name: "*"
+    state: latest
+    update_cache: yes
+
+# Подключаем EPEL repository:
+- name: install EPEL repository
+  yum:
+    name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+    state: present
+    update_cache: yes
+
+# Устанавливаем стандартные утилиты. Список пакетов задан в переменной tools_packages:
+- name: install tools
+  yum:
+    name: '{{ item.name }}'
+    state: present
+    update_cache: yes
+  with_items: '{{ tools_packages }}'
+
+# Выставляем автозагрузку для сетевого интерфейса по умолчанию:
+- name: set autoload for default interface
+  lineinfile:
+    path: "/etc/sysconfig/network-scripts/ifcfg-{{ansible_default_ipv4.interface}}"
+    regexp: '^ONBOOT='
+    line: 'ONBOOT="yes"'
+
+# Отключаем IPv6 для интерфейса по умолчанию:
+- name: disable IPv6 for eth0
+  replace:
+    path: "/etc/sysconfig/network-scripts/ifcfg-{{ansible_default_ipv4.interface}}"
+    regexp: '^(IPV6.*=).*$'
+    replace: '\1"no"'
+
+# Отключаем IPv6:
+- name: disable IPv6
+  blockinfile:
+    path: /etc/sysctl.d/disableipv6.conf
+    create: yes
+    marker: no
+    block: |
+      net.ipv6.conf.all.disable_ipv6 = 1
+      net.ipv6.conf.default.disable_ipv6 = 1
+
+# Отключаем SELinux:
+- name: disable SELinux
+  selinux:
+    state: disabled
+
+# Отключаем локальный firewall:
+- name: disable firewall
+  systemd:
+    name: firewalld
+    enabled: no
+    state: stopped
+  ignore_errors: yes
+
+# Выставляем часовой пояс. Временная зона задана в переменной timezone:
+- name: set timezone to UTC
+  timezone:
+    name: '{{ timezone }}'
+
+# Выставляем синхронизацию времени в крон:
+- name: set synchronize time in cron
+  cron:
+    name: "set synchronize time by ansible"
+    minute: 1
+    job: "/usr/sbin/ntpdate -u pool.ntp.org >/dev/null 2>&1"
+
+# Чистим старые ядра:
+- name: Remove old kernels
+  shell: "rpm -q kernel | grep -v `uname -r` | grep -v `/sbin/grubby --default-kernel | sed -r 's#^/boot/vmlinuz-##'` | xargs rpm -e || true"

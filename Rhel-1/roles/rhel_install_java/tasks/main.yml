@@ -1,0 +1,55 @@
+---
+# tasks file for roles/rhel_install_java
+
+# Создадим папку для дистрибутивов:
+- name: java | create java dst directory
+  file:
+    path: "{{ java_dst_path }}"
+    state: directory
+    recurse: yes
+    owner: root
+    group: root
+    mode: 0755
+
+# Скачиваем дистрибутив jdk:
+- name: java | download java
+  get_url:
+    url: "{{ download_url }}"
+    dest: "{{ java_dst_path }}"
+    tmp_dest: "{{ java_dst_path }}"
+    headers: "{{ java_cookie }}"
+    validate_certs: no
+    owner: root
+    group: root
+    mode: 0744
+    force: yes
+  ignore_errors: True
+
+# Находим скачанный jdk в папке дистрибутивов и заносим имя файла в переменную:
+- name: java | register java rpm
+  find:
+    paths: "{{ java_dst_path }}"
+    patterns: "*.rpm"
+  register: java_rpm
+
+# Проверим значение переменной:
+- debug: msg={{ java_rpm.files.0.path }}
+
+# Установим скачанный пакет:
+- name: java | install java rpm
+  yum:
+    name: "{{ java_rpm.files.0.path }}"
+    state: present
+
+# Копируем Java Cryptography Extension: 
+- name: java | copy JCE
+  copy:
+    src: files/{{ item }}
+    dest: /usr/java/default/jre/lib/security/
+    owner: root
+    group: root
+    mode: 0644
+    backup: yes
+  with_items:
+    - US_export_policy.jar
+    - local_policy.jar

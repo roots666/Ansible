@@ -1,0 +1,65 @@
+---
+# tasks file for install_haproxy
+
+# Устанавливаем последнюю версию haproxy:
+- name: install the latest version of haproxy
+  yum:
+    name: haproxy
+    state: latest
+
+# делаем бэкап rsyslog.conf:
+- name: backup rsyslog.conf
+  copy:
+    src: /etc/rsyslog.conf
+    dest: /etc/rsyslog.conf_orig
+    force: no
+    remote_src: true
+
+# Включаем udp в rsyslog:
+- name: format rsyslog | set UDP options
+  blockinfile:
+    path: /etc/rsyslog.conf
+    block: |
+    $ModLoad imudp
+    $UDPServerAddress 127.0.0.1
+    $UDPServerRun 514
+    state: present
+    insertafter: '^#\$UDPServerRun.*$'
+  notify:
+    - restart rsyslog
+
+# создаём файл конфигурации haproxy для rsyslog:
+- name: create rsyslog for haproxy
+  blockinfile:
+    path: /etc/rsyslog.d/haproxy.conf
+    content: |
+    if $programname == 'haproxy' and $syslogseverity <= '4' then /var/log/haproxy/haproxy.out
+    if $programname == 'haproxy' and $syslogseverity  > '4' then /var/log/haproxy/haproxy.log
+    & stop
+    state: present
+    create: yes
+  notify:
+    - restart rsyslog
+
+# делаем бэкап файла конфигурации logrotate:
+- name: backup logrotate file haproxy
+  copy:
+    src: /etc/logrotate.d/haproxy
+    dest: /etc/logrotate.d/haproxy_orig
+    force: no
+    remote_src: true
+
+# Копируем свой файл конфигурации logrotate для haproxy:
+- name: copy logrotate file for haproxy
+  copy:
+    src: files/logrotate_haproxy
+    dest: /etc/logrotate.d/haproxy
+    force: yes
+
+# добавляем в автозагрузку и запускаем сервис:
+- name: enable and start haproxy
+  systemd:
+    name: haproxy
+    daemon_reload: yes
+    enabled: yes
+    state: started

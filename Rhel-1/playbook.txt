@@ -1,0 +1,11 @@
+- hosts:
+     - project_group
+  user: username
+  become: yes
+  gather_facts: true
+  roles:
+     - rhel_install_new_server
+     - rhel_install_java
+     - rhel_install_haproxy
+     - rhel_install_nginx
+     - rhel_install_mysql

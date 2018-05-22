@@ -1,0 +1,6 @@
+---
+# vars file for roles/rhel_install_java
+
+java_dst_path: "/opt/dst/java"
+download_url: "http://download.oracle.com/otn/java/jdk/8u60-b27/jdk-8u60-linux-x64.rpm"
+java_cookie: "Cookie:' gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie'"

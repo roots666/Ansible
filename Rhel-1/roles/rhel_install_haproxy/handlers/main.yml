@@ -1,0 +1,12 @@
+---
+# handlers file for install_haproxy
+
+- name: restart rsyslog
+  systemd:
+    name: rsyslog
+    state: restarted
+
+- name: reload haproxy
+  systemd:
+    haproxy: name
+    state: reloaded

@@ -1,0 +1,93 @@
+--
+-
+# tasks file for roles/rhel_install_mysql
+
+# Устанавливаем репозиторий yum:
+- name: install mysql repo
+  yum:
+    name: "{{ mysql_repo_rpm }}"
+    state: installed
+
+# Устанавливаем пакеты mysql:
+- name: install mysql
+  yum:
+    name: "{{ mysql_packets }}"
+    state: installed
+
+# Добавляем mysql в автозагрузку и запускаем его:
+- name: enable mysql
+  systemd:
+    daemon_reload: yes
+    name: mysqld.service
+    enabled: yes
+    state: started
+
+# Парсим лог файл mysql и получаем из него пароль рута, назначенный при установке и который нам необходимо сменить. Заносим пароль из файла лога в переменную mysql_root_temp_password.
+- name: take default root password from mysql log file
+  shell: >
+    awk -F': ' '$0 ~ "temporary password"{print $2}' {{ mysql_log }} | tail -1
+  register: mysql_root_temp_password
+
+# Проверяем, что мы действительно получили временный пароль:
+- name: check mysql_root_temp_password
+  debug: msg={{ mysql_root_temp_password.stdout }}
+  when: mysql_root_temp_password is defined
+
+# Назначаем временный пароль как действительный пароль для рута:
+- name: Set temp root pass as root password
+  set_fact:
+    mysql_root_password: "{{ mysql_root_temp_password.stdout }}"
+  when: mysql_root_temp_password is defined
+
+# Копируем шаблон с новым паролем рута:
+- name: Copy the root credentials as .my.cnf file
+  template:
+    src: root.cnf.j2
+    dest: "~/.my.cnf"
+    mode: 0600
+
+# Проверяем, валиден ли текущий пароль рута:
+- name: register password expire
+  shell: mysql --defaults-file=~/.my.cnf -e "SELECT NOW();"
+  register: password_expired
+  ignore_errors: True
+
+- name: check password_expired
+  debug: msg={{ password_expired.stdout }}
+  when: password_expired is defined
+
+# Наконец-то устанавливаем постоянный пароль для рута на localhost:
+- name: ALTER USER root@localhost
+  shell: mysql --defaults-file=~/.my.cnf --connect-expired-password -e "ALTER USER root@localhost IDENTIFIED BY '{{ mysql_root_password }}';"
+  when: password_expired.stdout.find("expired") != -1
+
+# Устанавливаем постоянный пароль для остальных учётных записей рута:
+- name: Update MySQL root password for all root accounts
+  mysql_user:
+    name: root
+    host: "{{ item }}"
+    password: "{{ mysql_root_password }}"
+    state: present
+    priv: "*.*:ALL,GRANT"
+  with_items:
+    - "{{ ansible_hostname }}"
+    - 127.0.0.1
+    - ::1
+    - localhost
+  when: mysql_root_temp_password is defined
+
+# Удалим анонимного пользователя:
+- name: Ensure Anonymous user(s) are not in the database
+  mysql_user:
+    name: ''
+    host: "{{ item }}"
+    state: absent
+  with_items:
+    - localhost
+    - "{{ ansible_hostname }}"
+
+# Удалим тестовую базу данных:
+- name: Remove the test database
+  mysql_db:
+    name: test
+    state: absent

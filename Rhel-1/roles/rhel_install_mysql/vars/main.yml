@@ -1,0 +1,10 @@
+---
+# vars file for roles/rhel_install_mysql
+
+mysql_repo_rpm: https://dev.mysql.com/get/mysql57-community-release-el7-11.noarch.rpm
+mysql_packets:
+  - mysql-community-server
+  - mysql-community-common
+  - MySQL-python
+
+mysql_log: /var/log/mysqld.log

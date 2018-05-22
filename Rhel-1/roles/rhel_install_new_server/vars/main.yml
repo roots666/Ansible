@@ -1,0 +1,31 @@
+---
+# vars file for rhel_install_new_server
+
+tools_packages:
+  - name: vim
+  - name: mc
+  - name: less
+  - name: sysstat
+  - name: iotop
+  - name: strace
+  - name: traceroute
+  - name: screen
+  - name: rsync
+  - name: curl
+  - name: python
+  - name: wget
+  - name: zlib
+  - name: unzip
+  - name: bind-utils
+  - name: ntp
+  - name: ntpdate
+  - name: telnet
+  - name: nmap
+  - name: tcpdump
+  - name: logrotate
+  - name: net-tools
+  - name: bash-completion
+  - name: yum-utils
+  - name: mtr
+
+timezone: UTC
