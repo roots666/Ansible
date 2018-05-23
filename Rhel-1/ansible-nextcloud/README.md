@@ -7,6 +7,7 @@ rbicker.nextcloud
 * follow best practises, performance tuning 
 * Nextcloud's updater.phar can be used to update the instance to the latest version
 
+Official: https://galaxy.ansible.com/aalaesar/install_nextcloud/
 
 Requirements
 ------------
