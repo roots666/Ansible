@@ -1,0 +1,9 @@
+http://docs.ansible.com/ansible/latest/user_guide/windows.html
+
+
+ansible windows_servers -m win_ping
+
+
+###Ask password (Remove pass frome hosts file before)
+ansible windows_servers -m win_ping --ask-pass
+

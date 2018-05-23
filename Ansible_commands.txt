@@ -1,0 +1,68 @@
+#####Ad-Hoc Commands
+
+###Ping hosts, taken from file
+ansible -i hosts.txt all -m ping 
+
+###List all inventory
+ansible-inventory --list
+
+###List all inventory in graph tree
+ansible-inventory --graph
+
+###All information from hosts
+ansible all -m setup
+
+###Shell command with argument
+ansible all -m shell -a "uptime"
+
+###Shell command with argument
+ansible all -m shell -a "ls -la /home"
+
+###command with argument for security use (without variables, etc)
+ansible all -m command -a "ls /etc"
+
+###Copy files module (run as sudo (become))
+ansible all -m copy -a "src=privet.txt dest=/home mode=777" -b
+
+###Command for delete file 
+ansible all -m file -a "path=/home/privet.txt state=absent" -b
+
+###Command for wget some file 
+ansible all -m get_url -a "url=https://someurl.com/file.txt dest=/home" -b
+
+###Install some programm
+ansible all -m yum -a "name=stress state=installed" -b
+
+###Remove some programm
+ansible all -m yum -a "name=stress state=removed" -b
+
+###Start check web command
+ansible all -m uri -a "url=http://somesite.com" 
+
+###Start check web command with content
+ansible all -m uri -a "url=http://somesite.com return_content=yes"
+
+###Install httpd programm
+ansible all -m yum -a "name=httpd state=latest" -b
+
+###Service httpd start and add to autostart
+ansible all -m service -a "name=httpd state=started enabled=yes" -b
+
+###Remove httpd programm
+ansible all -m yum -a "name=httpd state=removed" -b
+
+###Remove httpd programm with verbose
+ansible all -m yum -a "name=httpd state=removed" -b -vvvv
+
+###Ansible docs commands
+ansible-doc -l | grep win_
+
+
+
+
+
+
+
+
+
+
