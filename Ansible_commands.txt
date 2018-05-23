@@ -57,6 +57,10 @@ ansible all -m yum -a "name=httpd state=removed" -b -vvvv
 ###Ansible docs commands
 ansible-doc -l | grep win_
 
+###Run ansible with playbook
+ansible-playbook playbook.yml
+
+
 
 
 

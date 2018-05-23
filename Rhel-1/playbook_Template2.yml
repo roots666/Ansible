@@ -1,0 +1,13 @@
+
+---
+- name: Install default Apache Web Server
+  hosts: all
+  become: yes
+  
+  tasks:
+  
+  - name: Instakk Apache Web server
+    yum: name=httpd state=latest
+    
+  - name: Start Apache and Enable it on the boot
+    service: name =httpd state=started enabled=yes  

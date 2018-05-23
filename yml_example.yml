@@ -1,0 +1,31 @@
+
+---
+
+ - command1
+ - command2
+ 
+ - fruits:
+     - apple
+	 - orange
+	 - mango 
+	 
+ - vegetables:
+     - carrots
+     - cucumbers
+
+ - vasya:
+     nick: vaseek
+     position: developer
+     skills: 
+        - python
+        - perl
+        - php
+
+ - petya:
+     nick: "petya: krutoy"
+     position: manager
+     skills:
+        - manage
+        - make_noise
+ - kolya: { nick: kolyan, position: administrator, skills: ['killer', 'cleaner'] }
+ 
