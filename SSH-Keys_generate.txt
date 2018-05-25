@@ -1,15 +1,21 @@
 #####SSH-Keys generate
 
-#On client PC
+#On Master PC
 ssh-keygen -t rsa -b 4096 
-
+#Change passphrase for key
+ssh-keygen -p
 
 
 cd .ssh
 
-###Copy files to Master PC key files from clients PC's
-copy key1.pem
-copy key2.pem
+###Copy files from Master PC key files to clients PC's (nodes)
+
+ssh -i /home/bogdan/.ssh/id_rsa bogdan@172.20.18.136
+
+chmod 700 /home/USERNAME/.ssh
+chmod 0600 /home/USERNAME/.ssh
+
+
 
 sudo chmod 400 key*
 
